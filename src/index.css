@@ -1,0 +1,55 @@
+body {
+  background-color: #050505;
+  color: white;
+  justify-content: center;
+  font-weight: 600;
+}
+
+header {
+  border-bottom: 1px;
+  border-color: white;
+  margin: 10px;
+  margin-bottom: 100px;
+}
+
+p {
+  margin: 5px;
+}
+
+header span {
+  font-weight: 650;
+  font-size: 25px;
+  color: #c7c7c7;
+}
+
+form {
+  margin: 10px;
+}
+
+form span {
+  margin: 5px;
+}
+
+form input, select, button {
+  background-color: #050505;
+  border-color: white;
+  border-radius: 5px;
+  border-width: 1px;
+  border-style: solid;
+  margin: 10px;
+  padding: 5px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+  color: white;
+}
+
+form input:hover, select:hover, button:hover {
+  background-color: rgb(59, 59, 59);
+}
+
+.cursor {
+  position: absolute;
+  display: inline-block;
+}
+
+
