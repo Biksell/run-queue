@@ -2,7 +2,7 @@ const RequestForm = ({input, inputHandler, selection, selectionHandler, requestH
   return (
     <div>
       <form onSubmit={requestHandler}>
-        <span>Get runs:</span>
+        <span>Get pending runs from:</span>
         <input
           value={input}
           onChange={inputHandler}
