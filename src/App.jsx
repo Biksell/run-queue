@@ -21,6 +21,7 @@ function App() {
 
   const requestRuns = async (event) => {
     setLoading(true)
+    setRuns("")
     event.preventDefault()
     console.log(`Requested "${currentSelection}" with input "${currentFilter}"`)
     const newRuns = await runsService.getRuns(currentFilter, currentSelection)

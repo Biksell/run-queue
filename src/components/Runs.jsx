@@ -7,6 +7,11 @@ const Runs = ({runs}) => {
         <span>Runs: {runs}</span>
       </div>
     )
+  } else if (runs === "") {
+    return (
+      <>
+      </>
+    )
   }
   if ("error" in runs) {
     return (
