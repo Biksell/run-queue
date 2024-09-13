@@ -3,6 +3,7 @@ body {
   color: white;
   justify-content: center;
   font-weight: 600;
+
 }
 
 header {
@@ -52,4 +53,23 @@ form input:hover, select:hover, button:hover {
   display: inline-block;
 }
 
+.loader {
+  border: 3px solid #050505;
+  border-top: 3px solid white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  margin-top: 30px;
+  animation: spin 2s linear infinite;
+}
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

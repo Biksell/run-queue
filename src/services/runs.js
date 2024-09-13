@@ -10,8 +10,8 @@ const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
 const request = async (url, params = null) => {
+  await sleep(600)
   let response = null
   if(!params) {
     console.log(`GET ${url}, params: ${params}`)
@@ -26,10 +26,9 @@ const request = async (url, params = null) => {
       body: params
     })
   }
-
-  if (response.ok) {
-    const data = await response.json()
-    return data
+  //console.log(response.status)
+  if(response.status == 429) {
+    return {"error": "Rate limited; Too many requests; Try again later"}
   }
   return await response.json()
 }
@@ -40,7 +39,7 @@ const reqGame = async (game, inputType) => {
   if (inputType === "url") {
     urlString = `${apiUrl}/GetGameData?gameUrl=${game}`
   } else {
-    urlString = `${apiUrl}/GetGameData?gameId=${game}`
+    urlString = `${apiUrl}/GetGameData?gameId="${game}"`
   }
 
   const data = await request(urlString)
@@ -78,7 +77,11 @@ const getRuns = async (value, type) => {
     const gameIds = data.gameList.map(game => game.id)
     console.log(gameIds)
     for (const gameId of gameIds) {
-      games = games.concat(await reqGame(gameId, "id"))
+      const data = await reqGame(gameId, "id")
+      if ("error" in data) {
+        return data
+      }
+      games = games.concat(data)
     }
   } else if (type === "user") {
     const data = await request(`${apiUrl}/GetUserSummary?url=${value}`)
@@ -112,12 +115,18 @@ const getRuns = async (value, type) => {
         obsolete: 1
       }
 
-      let data = await request(`${apiUrl}/GetGameLeaderboard2?page=${page}&params=` + JSON.stringify(params))
-      count += data.runList.length
-      while (page < data.pagination.pages) {
-        page += 1;
+      let data = null
+      while (data === null || page < data.pagination.pages) {
         data = await request(`${apiUrl}/GetGameLeaderboard2?page=${page}&params=` + JSON.stringify(params))
+        console.log(data)
+        if ("error" in data) {
+          break
+        }
         count += data.runList.length
+        page += 1;
+      }
+      if ("error" in data) {
+        return data
       }
     }
   }

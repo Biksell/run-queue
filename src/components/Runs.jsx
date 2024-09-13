@@ -1,6 +1,13 @@
 import Run from "./Run"
 
 const Runs = ({runs}) => {
+  if (typeof(runs) === "number") {
+    return (
+      <div>
+        <span>Runs: {runs}</span>
+      </div>
+    )
+  }
   if ("error" in runs) {
     return (
       <div>
