@@ -51,10 +51,12 @@ function App() {
         </header>
       </div>
       <div id="main-content">
+        <a href="https://www.github.com/biksell/run-queue">Source code</a>
         <p>
           Each API call has a 600ms delay because of rate-limit, so the more games a series or moderator has, the longer it will take.
         </p>
         <p>For games and series, use their abbreviation; For users and moderators, use their username</p>
+
         <RequestForm
           input={currentFilter}
           inputHandler={handleFilterChange}
