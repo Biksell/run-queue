@@ -73,3 +73,37 @@ form input:hover, select:hover, button:hover {
   flex-direction: column;
   align-items: center;
 }
+
+.input-area {
+  display: inline-block;
+  position: relative;
+}
+
+.autocomplete {
+  padding: 0;
+  margin: 0;
+  background: #181818;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.autocomplete li {
+  list-style: none;
+  padding: 10px 5px;
+  cursor: pointer;
+  overflow-wrap: break-word;
+  border: 1px #8a8a8a solid;
+}
+
+.autocomplete li.active {
+  background-color: #929292;
+}
+
+.autocomplete #loading {
+  cursor: unset;
+}
+
+.autocomplete li:not(#loading):hover {
+  background-color: #929292;
+}

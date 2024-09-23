@@ -1,4 +1,6 @@
-const apiUrl = "https://www.speedrun.com/api/v1"
+const apiv1 = "https://www.speedrun.com/api/v1"
+const apiv2 = "https://www.speedrun.com/api/v2"
+const apiUrl = apiv1
 
 /*
   Game: GetGameData (url) -> GetGameLeaderboard2
@@ -6,31 +8,26 @@ const apiUrl = "https://www.speedrun.com/api/v1"
   Moderator: GetUserSummary[userGameModeratorStats] -> GetGameLeaderboard ->
 */
 
-const sleep = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+const request = async (url, {signal, useTimeOut = true} = {}) => {
+  console.log(`GET ${url}`)
+  const response = await fetch(url, { signal });
 
-const request = async (url, params = null) => {
-  let response = null
-  if(!params) {
-    console.log(`GET ${url}, params: ${params}`)
-    response = await fetch(url)
-  } else {
-    console.log(`POST ${url}, params: ${params}`)
-    response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: params
-    })
+  if(!response.ok) {
+    return {"error": response.status};
   }
-  //console.log(response.status)
-  if(response.status != 200) {
-    return {"error": response.status}
-  }
-  await sleep(605)
-  return await response.json()
+  
+  const json = response.json();
+  if(!useTimeOut) return await json;
+
+  await new Promise((resolve) => {
+    const timeout = setTimeout(resolve, 605);
+    signal?.addEventListener("abort", () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+  });
+
+  return await json;
 }
 
 
@@ -58,17 +55,17 @@ const reqGame = async (game, inputType) => {
 }
 
 const getRuns = async (value, type) => {
-  if (apiUrl === "https://www.speedrun.com/api/v2") {
+  if (apiUrl == apiv2) {
     let games = []
 
-    if (type === "game") {
+    if (type == "game") {
       const data = await reqGame(value, "url")
       if ("error" in data) {
         return data
       }
 
       games = games.concat(data)
-    } else if (type === "series") {
+    } else if (type == "series") {
       const data = await request(`${apiUrl}/GetSeriesSummary?seriesUrl=${value}`)
       if ("error" in data) {
         return data
@@ -84,7 +81,7 @@ const getRuns = async (value, type) => {
         }
         games = games.concat(data)
       }
-    } else if (type === "user") {
+    } else if (type == "user") {
       const data = await request(`${apiUrl}/GetUserSummary?url=${value}`)
       if ("error" in data) {
         return data
@@ -92,7 +89,7 @@ const getRuns = async (value, type) => {
 
       return data.userStats.runsPending
 
-    } else if (type === "moderator") {
+    } else if (type == "moderator") {
       const data = await request(`${apiUrl}/GetUserSummary?url=${value}`)
       if ("error" in data) {
         return data
@@ -136,10 +133,10 @@ const getRuns = async (value, type) => {
     return {count: count}
   }
 
-  if(apiUrl === "https://www.speedrun.com/api/v1") {
+  if(apiUrl == apiv1) {
     let games = []
 
-    if (type === "game") {
+    if (type == "game") {
       const data = await request(`${apiUrl}/games?abbreviation=${value}`)
 
       if (data.pagination.size == 0) {
@@ -148,7 +145,7 @@ const getRuns = async (value, type) => {
 
       games = games.concat(data.data[0]["id"])
 
-    } else if (type === "series") {
+    } else if (type == "series") {
       const data = await request(`${apiUrl}/series?abbreviation=${value}`)
 
       if (data.pagination.size == 0) {
@@ -162,14 +159,14 @@ const getRuns = async (value, type) => {
         games = games.concat(gamesData.data.map(g => g.id))
         offset += 200
       } while (gamesData.pagination.size == 200)
-    } else if (type === "user") {
+    } else if (type == "user") {
       const data = await request(`https://www.speedrun.com/api/v2/GetUserSummary?url=${value}`)
       if ("error" in data) {
         return data
       }
 
       return data.userStats.runsPending
-    } else if (type === "moderator") {
+    } else if (type == "moderator") {
       const userData = await request(`${apiUrl}/users?name=${value}`)
       const userId = userData.data[0].id
 
@@ -196,5 +193,43 @@ const getRuns = async (value, type) => {
   }
 }
 
+const getAutocomplete = async (query, type, signal) => {
+  if (apiUrl == apiv2) {
+    const urlParams = new URLSearchParams({
+      query,
+      includeGames: type == "game",
+      includeSeries: type == "series",
+      includeUsers: type == "user" || type == "moderator",
+      limit: 25
+    });
+    const data = await request(`${apiUrl}/GetSearch?${urlParams}`, {signal, useTimeOut: false });
+    
+    return Object.values(data).find(x => x.length).map(x => ({
+      name: type == "series" ? `${x.name} Series` : x.name,
+      url: x.url
+    }));
+  }
 
-export default {getRuns}
+  if (apiUrl == apiv1) {
+    const typeMap = {
+      game: "games",
+      series: "series",
+      user: "users",
+      moderator: "users"
+    };
+    const correctedType = typeMap[type];
+    
+    // Can't search through users when the search is less than 3 characters
+    if(correctedType == "users" && query.length < 3)
+      return [];
+    
+    const data = await request(`${apiUrl}/${correctedType}?name=${query}`, {signal, useTimeOut: false });
+
+    return data.data.map(x => ({
+      name: type == "series" ? `${x.names.international} Series` : x.names.international,
+      url: x.weblink.split("/").at(-1)
+    }));
+  }
+}
+
+export default {getRuns, getAutocomplete}
