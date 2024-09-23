@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from "react"
 import RequestForm from "./components/RequestForm"
 import Runs from "./components/Runs"
 import Loading from "./components/Loading"
@@ -7,9 +7,9 @@ import runsService from "./services/runs"
 
 function App() {
   const [runs, setRuns] = useState({})
-  const [currentFilter, setCurrentFilter] = useState("")
-  const [currentSelection, setCurrentSelection] = useState("game")
-  const [cursor, setCursor] = useState('_');
+  const inputRef = useRef(null)
+  const selectRef = useRef(null)
+  const [cursor, setCursor] = useState('_')
   const [loading, setLoading] = useState(false)
 
   useEffect (() => {
@@ -23,19 +23,13 @@ function App() {
     setLoading(true)
     setRuns("")
     event.preventDefault()
+    const currentFilter = inputRef.current.value
+    const currentSelection = selectRef.current.value
     console.log(`Requested "${currentSelection}" with input "${currentFilter}"`)
     const newRuns = await runsService.getRuns(currentFilter, currentSelection)
     console.log(typeof(newRuns))
     setRuns(newRuns)
     setLoading(false)
-  }
-
-  const handleFilterChange = (event) => {
-    setCurrentFilter(event.target.value)
-  }
-
-  const handleSelectionChange = (event) => {
-    setCurrentSelection(event.target.value)
   }
 
   return (
@@ -58,10 +52,7 @@ function App() {
         <p>For games and series, use their abbreviation; For users and moderators, use their username</p>
 
         <RequestForm
-          input={currentFilter}
-          inputHandler={handleFilterChange}
-          selection={currentSelection}
-          selectionHandler={handleSelectionChange}
+          ref={{inputRef, selectRef}}
           requestHandler={requestRuns}
           loading={loading}
         />
