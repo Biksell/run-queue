@@ -61,6 +61,7 @@ function App() {
           selection={currentSelection}
           selectionHandler={handleSelectionChange}
           requestHandler={requestRuns}
+          loading={loading}
         />
         <div>
           <Runs runs={runs}/>

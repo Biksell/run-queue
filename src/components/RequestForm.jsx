@@ -1,4 +1,10 @@
-const RequestForm = ({input, inputHandler, selection, selectionHandler, requestHandler}) => {
+const RequestForm = ({input, inputHandler, selection, selectionHandler, requestHandler, loading}) => {
+  let submitBtn
+  if (!loading) {
+    submitBtn = (<button className={``} type="submit">Get Runs</button>)
+  } else {
+    submitBtn = (<button className={``} type="submit" disabled> Loading... </button>)
+  }
   return (
     <div>
       <form onSubmit={requestHandler}>
@@ -14,7 +20,7 @@ const RequestForm = ({input, inputHandler, selection, selectionHandler, requestH
           <option value="user">User</option>
           <option value="moderator">Moderator</option>
         </select>
-        <button className={``} type="submit">Get Runs</button>
+        {submitBtn}
       </form>
     </div>
   )
