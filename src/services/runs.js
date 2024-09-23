@@ -26,10 +26,10 @@ const request = async (url, params = null) => {
     })
   }
   //console.log(response.status)
-  if(response.status == 429 || response.status == 420) {
-    return {"error": "Rate limited; Too many requests; Try again later"}
+  if(response.status != 200) {
+    return {"error": response.status}
   }
-  await sleep(600)
+  await sleep(605)
   return await response.json()
 }
 
